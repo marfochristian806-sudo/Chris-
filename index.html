@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stack Tower — a block-stacking game built on the Stack data structure</title>
+<meta name="description" content="Stack Tower is a Tetris-lite puzzle game where every column of the board is a Stack (LIFO). Push blocks, pop matches, and avoid the stack overflow.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-head">
+  <h1>STACK<span>TOWER</span></h1>
+  <p class="tagline">A Tetris-lite puzzle where <b>every column is a Stack</b>.</p>
+</header>
+
+<main class="layout">
+
+  <!-- ===================== BOARD ===================== -->
+  <section class="board-wrap" id="boardWrap">
+    <canvas id="board" width="376" height="608" aria-label="Game board"></canvas>
+
+    <div class="overlay" id="overlay">
+      <div class="ov-card" data-ov="start">
+        <p class="ov-kicker">Data Structures · Stack (LIFO)</p>
+        <h2>STACK TOWER</h2>
+        <p class="ov-text">
+          Drop blocks into the six columns. Each column is a
+          <b>stack</b>: blocks are <b>pushed</b> on top and matching
+          blocks are <b>popped</b> off the top.
+        </p>
+        <ul class="ov-rules">
+          <li><b>3+ identical blocks</b> stacked on top of each other pop.</li>
+          <li>Every pop can trigger a <b>cascade</b> — combo multiplies the score.</li>
+          <li>If a stack gets too tall… <b>stack overflow</b>. Game over.</li>
+        </ul>
+        <button class="btn primary" id="btnStart">START GAME</button>
+        <p class="ov-hint">← → move · Space drop · U undo · P pause · 1-6 pick column</p>
+      </div>
+
+      <div class="ov-card is-hidden" data-ov="pause">
+        <h2>PAUSED</h2>
+        <p class="ov-text">Press <b>P</b> or a button to continue.</p>
+        <button class="btn primary" id="btnResume">RESUME</button>
+        <button class="btn ghost" id="btnRestartP">RESTART</button>
+      </div>
+
+      <div class="ov-card is-hidden" data-ov="over">
+        <p class="ov-kicker danger">LIFO LIMIT REACHED</p>
+        <h2>STACK OVERFLOW</h2>
+        <p class="ov-text" id="overReason">The stack grew past its capacity.</p>
+        <div class="ov-stats">
+          <div><span>SCORE</span><strong id="overScore">0</strong></div>
+          <div><span>BEST</span><strong id="overBest">0</strong></div>
+        </div>
+        <button class="btn primary" id="btnRestart">PLAY AGAIN</button>
+        <button class="btn ghost" id="btnUndoOv">UNDO LAST MOVE (U)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SIDE PANEL ===================== -->
+  <aside class="panel">
+
+    <div class="stats">
+      <div class="stat"><span>SCORE</span><strong id="score">0</strong></div>
+      <div class="stat"><span>BEST</span><strong id="best">0</strong></div>
+      <div class="stat"><span>LEVEL</span><strong id="level">1</strong></div>
+      <div class="stat"><span>COMBO</span><strong id="combo">×1</strong></div>
+    </div>
+
+    <div class="card next-card">
+      <div class="card-h">
+        <span class="tag">peek()</span>
+        <span class="label">NEXT BLOCK</span>
+      </div>
+      <div class="next-piece" id="nextPiece"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <span class="tag">Stack[]</span>
+        <span class="label">LIVE STACK INSPECTOR — top of each stack is the top of the list</span>
+      </div>
+      <div class="stacks" id="stacks"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h">
+        <span class="tag">ops</span>
+        <span class="label">STACK OPERATIONS LOG</span>
+      </div>
+      <ul class="log" id="log"></ul>
+    </div>
+
+    <div class="controls">
+      <button class="btn ghost" id="btnUndo">UNDO <kbd>U</kbd></button>
+      <button class="btn ghost" id="btnPause">PAUSE <kbd>P</kbd></button>
+      <button class="btn ghost" id="btnRestart2">RESTART <kbd>R</kbd></button>
+    </div>
+
+  </aside>
+</main>
+
+<footer class="site-foot">
+  <h3>How this game uses the Stack data structure</h3>
+  <div class="foot-grid">
+    <div>
+      <h4>1 · One stack per column</h4>
+      <p>Each of the six columns is a <code>Stack</code> object implementing
+      <code>push()</code>, <code>pop()</code>, <code>peek()</code>,
+      <code>size()</code> and <code>isEmpty()</code>. Blocks are only ever
+      added or removed from the <b>top</b> — never the middle — which is
+      exactly the LIFO rule.</p>
+    </div>
+    <div>
+      <h4>2 · Clearing = repeated pop()</h4>
+      <p>A clear reads the top block with <code>peek()</code>, counts how many
+      identical blocks sit consecutively on top of it, then pops them one by
+      one. Because pops always come off the top, no block ever has to "fall
+      through" another block — the structure stays valid by construction.</p>
+    </div>
+    <div>
+      <h4>3 · Undo = a second stack</h4>
+      <p>Every move pushes a full state snapshot onto a <b>history stack</b>.
+      <code>undo()</code> pops that snapshot and restores it — the same
+      double-stack technique used by undo/redo in editors.</p>
+    </div>
+    <div>
+      <h4>4 · Game over = stack overflow</h4>
+      <p>The loss condition is a stack exceeding its capacity: if
+      <code>size() + piece.length > ROWS</code> the push is rejected and the
+      game ends. The dashed red line on the board marks the capacity limit.</p>
+    </div>
+  </div>
+  <p class="credits">Stack Tower · built for a data structures assignment · no libraries, one <code><canvas></code> and the LIFO principle.</p>
+</footer>
+
+<script src="game.js"></script>
+</body>
+</html>
